@@ -59,7 +59,21 @@ export default function Home() {
       setMessage('¡Métrica guardada exitosamente!');
       setMetricName('');
       setMetricValue('');
-      fetchMetrics(); // Recargar la lista automáticamente
+      fetchMetrics();
+    }
+  };
+
+  // Eliminar un registro por ID
+  const handleDelete = async (id: string) => {
+    const { error } = await supabase
+      .from('metrics_logs')
+      .delete()
+      .eq('id', id);
+
+    if (error) {
+      alert(`Error al eliminar: ${error.message}`);
+    } else {
+      fetchMetrics();
     }
   };
 
@@ -154,7 +168,7 @@ export default function Home() {
         )}
       </div>
 
-      {/* Historial de Registros */}
+      {/* Historial de Registros con Botón de Eliminar */}
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
         <h2 className="text-lg font-bold text-slate-200 mb-4">
           Historial de Registros
@@ -170,19 +184,29 @@ export default function Home() {
                 key={item.id}
                 className="flex items-center justify-between bg-slate-800 border border-slate-700/60 p-3 rounded-lg text-sm"
               >
-                <div>
-                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30 mr-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-semibold px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
                     {item.sport}
                   </span>
                   <span className="font-medium text-slate-200">
                     {item.metric_name}
                   </span>
                 </div>
-                <div className="font-bold text-slate-100">
-                  {item.metric_value}{' '}
-                  <span className="text-xs font-normal text-slate-400">
-                    {item.unit}
+
+                <div className="flex items-center gap-3">
+                  <span className="font-bold text-slate-100">
+                    {item.metric_value}{' '}
+                    <span className="text-xs font-normal text-slate-400">
+                      {item.unit}
+                    </span>
                   </span>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="text-xs text-red-400 hover:text-red-300 hover:bg-red-500/10 p-1 rounded transition-colors"
+                    title="Eliminar registro"
+                  >
+                    ✕
+                  </button>
                 </div>
               </div>
             ))}
