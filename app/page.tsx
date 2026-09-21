@@ -20,8 +20,8 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [metrics, setMetrics] = useState<Metric[]>([]);
+  const [selectedFilter, setSelectedFilter] = useState('Todos');
 
-  // Consultar las métricas almacenadas en Supabase
   const fetchMetrics = async () => {
     const { data, error } = await supabase
       .from('metrics_logs')
@@ -63,7 +63,6 @@ export default function Home() {
     }
   };
 
-  // Eliminar un registro por ID
   const handleDelete = async (id: string) => {
     const { error } = await supabase
       .from('metrics_logs')
@@ -77,8 +76,14 @@ export default function Home() {
     }
   };
 
+  // Filtrar métricas según el deporte seleccionado
+  const filteredMetrics = selectedFilter === 'Todos'
+    ? metrics
+    : metrics.filter((m) => m.sport === selectedFilter);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-start bg-slate-950 text-white p-6 pt-12">
+      {/* Formulario */}
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl mb-8">
         <h1 className="text-2xl font-bold text-blue-500 mb-2">
           Sports Performance App
@@ -168,18 +173,36 @@ export default function Home() {
         )}
       </div>
 
-      {/* Historial de Registros con Botón de Eliminar */}
+      {/* Historial con Filtros */}
       <div className="w-full max-w-md bg-slate-900 border border-slate-800 rounded-xl p-6 shadow-xl">
         <h2 className="text-lg font-bold text-slate-200 mb-4">
           Historial de Registros
         </h2>
-        {metrics.length === 0 ? (
-          <p className="text-sm text-slate-500 text-center">
-            No hay registros aún.
+
+        {/* Botones de Filtro */}
+        <div className="flex gap-2 mb-4 overflow-x-auto pb-1">
+          {['Todos', 'Vóley', 'Básquetbol', 'Fútbol'].map((item) => (
+            <button
+              key={item}
+              onClick={() => setSelectedFilter(item)}
+              className={`px-3 py-1 rounded-full text-xs font-medium transition-colors ${
+                selectedFilter === item
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-slate-800 text-slate-400 hover:bg-slate-700'
+              }`}
+            >
+              {item}
+            </button>
+          ))}
+        </div>
+
+        {filteredMetrics.length === 0 ? (
+          <p className="text-sm text-slate-500 text-center py-4">
+            No hay registros para este filtro.
           </p>
         ) : (
           <div className="space-y-3">
-            {metrics.map((item) => (
+            {filteredMetrics.map((item) => (
               <div
                 key={item.id}
                 className="flex items-center justify-between bg-slate-800 border border-slate-700/60 p-3 rounded-lg text-sm"
